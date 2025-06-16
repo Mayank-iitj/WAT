@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Attendance System</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --teal: #14b8a6;
+      --accent: #ff6b6b;
+      --background: #f8fafc;
+      --card-bg: #fff;
+      --success: #22c55e;
+      --warning: #f59e42;
+      --error: #ef4444;
+      --text: #1e293b;
+      --shadow: 0 4px 24px rgba(30,41,59,0.08);
+      --radius: 18px;
+      --transition: 0.25s cubic-bezier(.4,0,.2,1);
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: var(--background);
+      font-family: 'Inter', Arial, sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 2rem 2.5rem;
+      text-align: center;
+      margin-top: 2rem;
+      min-width: 320px;
+      animation: fadeInUp 0.7s;
+    }
+    h1 { color: var(--primary); }
+    input, button, select {
+      font-size: 1.1em;
+      padding: 0.5em 1em;
+      border-radius: 8px;
+      border: 1px solid #e0e7ef;
+      margin: 0.5em 0;
+      font-family: inherit;
+    }
+    button {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition), transform var(--transition);
+    }
+    button:hover { background: var(--teal); transform: scale(1.04);}
+    .status { margin-top: 1em; font-size: 1.1em; }
+    .link-btn { background: none; color: #2563eb; border: none; text-decoration: underline; cursor: pointer; font-size: 1em; margin: 0.5em 0; }
+    .attendance-log { margin-top: 1em; color: #64748b; font-size: 1em; }
+    .dashboard-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .card-admin {
+      margin-top: 1.5rem;
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.5rem 1.5rem 1.2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      animation: fadeInUp 0.8s;
+      position: relative;
+      overflow: hidden;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 2rem;
+      animation: fadeInUp 1s;
+    }
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      font-size: 1rem;
+    }
+    th {
+      background: #f1f5f9;
+      font-weight: 700;
+      color: var(--primary);
+      border-bottom: 2px solid #e0e7ef;
+    }
+    tr:not(:last-child) td {
+      border-bottom: 1px solid #e0e7ef;
+    }
+    td input {
+      font-size: 1rem;
+      padding: 0.4em 0.7em;
+      border: 1px solid #e0e7ef;
+      border-radius: 7px;
+      background: #f8fafc;
+      font-family: inherit;
+      width: 90%;
+      transition: border-color var(--transition);
+    }
+    td input:focus {
+      border-color: var(--teal);
+    }
+    .attendance-log-admin {
+      font-size: 0.95em;
+      color: #64748b;
+      margin-top: 0.3em;
+      line-height: 1.4;
+    }
+    .action-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      padding: 0.5em 1.1em;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 0.3em;
+      margin-bottom: 0.2em;
+      box-shadow: 0 2px 8px #2563eb22;
+      transition: background var(--transition), transform var(--transition);
+      outline: none;
+    }
+    .action-btn:hover {
+      background: var(--teal);
+      transform: scale(1.06);
+    }
+    .remove-btn {
+      background: var(--accent);
+    }
+    .remove-btn:hover {
+      background: var(--error);
+    }
+    #report {
+      background: #f1f5f9;
+      border-radius: var(--radius);
+      padding: 1.2em;
+      font-size: 1.05em;
+      color: var(--primary);
+      margin-bottom: 2em;
+      box-shadow: var(--shadow);
+      overflow-x: auto;
+      animation: fadeInUp 1.1s;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(40px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    @media (max-width: 800px) {
+      .dashboard-cards { grid-template-columns: 1fr; }
+      .card, .card-admin { min-width: 0; }
+      table, th, td { font-size: 0.98em; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Role Selection -->
+  <div class="card" id="roleCard">
+    <h1>Attendance System</h1>
+    <p>Login as:</p>
+    <button onclick="selectRole('admin')">Admin</button>
+    <button onclick="selectRole('worker')">Worker</button>
+  </div>
+
+  <!-- Admin Login -->
+  <div class="card" id="adminLoginCard" style="display:none">
+    <h1>Admin Login</h1>
+    <form id="adminLoginForm" autocomplete="off">
+      <input id="adminId" placeholder="Admin ID" required /><br>
+      <input id="adminPassword" type="password" placeholder="Password" required /><br>
+      <button type="submit">Login</button>
+    </form>
+    <div class="status" id="adminLoginStatus"></div>
+  </div>
+
+  <!-- Admin Dashboard -->
+  <main class="container" id="adminDashboard" style="display:none">
+    <section class="dashboard-cards" id="dashboardCards"></section>
+    <table id="workersTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Attendance</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <button class="action-btn" onclick="showReport()">Show Report</button>
+    <pre id="report" style="display:none"></pre>
+  </main>
+
+  <!-- Worker Registration Card -->
+  <div class="card" id="workerRegisterCard" style="display:none">
+    <h1>Worker Registration</h1>
+    <form id="workerRegisterForm" autocomplete="off">
+      <input id="regWorkerName" placeholder="Username" required /><br>
+      <input id="regWorkerPassword" type="password" placeholder="Password" required /><br>
+      <button type="submit">Register</button>
+    </form>
+    <div class="status" id="workerRegisterStatus"></div>
+    <button class="link-btn" onclick="showWorkerLogin()">Already registered? Login</button>
+  </div>
+
+  <!-- Worker Login Card -->
+  <div class="card" id="workerLoginCard" style="display:none">
+    <h1>Worker Login</h1>
+    <form id="workerLoginForm" autocomplete="off">
+      <input id="workerName" placeholder="Username" required /><br>
+      <input id="workerPassword" type="password" placeholder="Password" required /><br>
+      <button type="submit">Login</button>
+    </form>
+    <div class="status" id="workerLoginStatus"></div>
+    <button class="link-btn" onclick="showWorkerRegister()">New worker? Register</button>
+  </div>
+
+  <!-- Worker Dashboard -->
+  <div class="card" id="workerDashboard" style="display:none">
+    <h1>Welcome, <span id="workerNameDisplay"></span></h1>
+    <div class="status" id="workerStatus"></div>
+    <div class="attendance-log" id="attendanceLog"></div>
+    <button onclick="logoutWorker()">Logout</button>
+  </div>
+
+  <script>
+    const API = 'http://localhost:4000/api';
+
+    // Role selection
+    function selectRole(role) {
+      hideAll();
+      if (role === 'admin') document.getElementById('adminLoginCard').style.display = "block";
+      else if (role === 'worker') document.getElementById('workerLoginCard').style.display = "block";
+    }
+    function hideAll() {
+      ['roleCard','adminLoginCard','adminDashboard','workerRegisterCard','workerLoginCard','workerDashboard'].forEach(id => {
+        document.getElementById(id).style.display = "none";
+      });
+    }
+
+    // Admin Login
+    document.getElementById('adminLoginForm').onsubmit = function(e) {
+      e.preventDefault();
+      const id = document.getElementById('adminId').value;
+      const pw = document.getElementById('adminPassword').value;
+      if (id === 'mayyanks' && pw === 'msmayank') {
+        hideAll();
+        document.getElementById('adminDashboard').style.display = "block";
+        loadWorkers();
+      } else {
+        document.getElementById('adminLoginStatus').textContent = "Invalid Admin ID or Password";
+      }
+    };
+
+    // Admin dashboard logic
+    const table = document.querySelector('#workersTable tbody');
+    const reportBox = document.getElementById('report');
+    const dashboardCards = document.getElementById('dashboardCards');
+
+    function renderDashboard(workers) {
+      let totalWorkers = workers.length;
+      let totalAttendance = workers.reduce((sum, w) => sum + (w.attendance ? w.attendance.length : 0), 0);
+
+      dashboardCards.innerHTML = `
+        <div class="card-admin">
+          <span class="material-icons">badge</span>
+          <div class="card-title">Total Workers</div>
+          <div class="card-value">${totalWorkers}</div>
+          <div class="card-desc">Active on site</div>
+        </div>
+        <div class="card-admin">
+          <span class="material-icons">event_available</span>
+          <div class="card-title">Attendance Logs</div>
+          <div class="card-value">${totalAttendance}</div>
+          <div class="card-desc">Entries & Exits</div>
+        </div>
+      `;
+    }
+
+    function loadWorkers() {
+      fetch(`${API}/workers`).then(r=>r.json()).then(workers=>{
+        renderDashboard(workers);
+        table.innerHTML = '';
+        workers.forEach((w, idx)=>{
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${w.name}</td>
+            <td>
+              <div class="attendance-log-admin">
+                ${w.attendance && w.attendance.length
+                  ? w.attendance.slice(-3).map(a =>
+                    `${a.type.charAt(0).toUpperCase()+a.type.slice(1)} @ ${new Date(a.time).toLocaleString()}`
+                  ).join('<br>')
+                  : 'No records'}
+              </div>
+            </td>
+            <td>
+              <button class="action-btn remove-btn" onclick="removeWorker(${w.id})">
+                <span class="material-icons" style="font-size:1em;vertical-align:middle;">delete</span>
+              </button>
+            </td>
+          `;
+          table.appendChild(tr);
+        });
+      });
+    }
+    window.removeWorker = id => {
+      fetch(`${API}/workers/${id}`, { method: 'DELETE' }).then(loadWorkers);
+    };
+    window.showReport = () => {
+      fetch(`${API}/reports`).then(r=>r.json()).then(data=>{
+        reportBox.style.display = "block";
+        reportBox.textContent = JSON.stringify(data.attendanceReport, null, 2);
+        setTimeout(()=>{ reportBox.scrollIntoView({behavior:"smooth"}); }, 100);
+      });
+    }
+
+    // Worker Registration
+    function showWorkerRegister() {
+      hideAll();
+      document.getElementById('workerRegisterCard').style.display = "block";
+    }
+    function showWorkerLogin() {
+      hideAll();
+      document.getElementById('workerLoginCard').style.display = "block";
+    }
+    document.getElementById('workerRegisterForm').onsubmit = function(e) {
+      e.preventDefault();
+      const name = document.getElementById('regWorkerName').value;
+      const password = document.getElementById('regWorkerPassword').value;
+      document.getElementById('workerRegisterStatus').textContent = "Registering...";
+      fetch(`${API}/register`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ name, password })
+      })
+      .then(async res => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Registration failed");
+        document.getElementById('workerRegisterStatus').style.color = "green";
+        document.getElementById('workerRegisterStatus').textContent = "Registration successful! Please login.";
+        setTimeout(showWorkerLogin, 1200);
+      })
+      .catch(err => {
+        document.getElementById('workerRegisterStatus').style.color = "red";
+        document.getElementById('workerRegisterStatus').textContent = err.message;
+      });
+    };
+
+    // Worker Login
+    let workerId = null;
+    let workerName = "";
+    let markedEntry = false;
+    document.getElementById('workerLoginForm').onsubmit = function(e) {
+      e.preventDefault();
+      const name = document.getElementById('workerName').value;
+      const password = document.getElementById('workerPassword').value;
+      document.getElementById('workerLoginStatus').textContent = "Logging in...";
+      fetch(`${API}/login`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ name, password })
+      })
+      .then(async res => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Login failed");
+        workerId = data.id;
+        workerName = data.name;
+        document.getElementById('workerNameDisplay').textContent = workerName;
+        hideAll();
+        document.getElementById('workerDashboard').style.display = "block";
+        markAttendance('entry');
+        loadAttendance();
+      })
+      .catch(err => {
+        document.getElementById('workerLoginStatus').style.color = "red";
+        document.getElementById('workerLoginStatus').textContent = err.message;
+      });
+    };
+
+    function markAttendance(type) {
+      if (!workerId) return;
+      fetch(`${API}/attendance/${workerId}`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ type })
+      }).then(()=>{
+        document.getElementById('workerStatus').textContent =
+          type === 'entry' ? 'Entry marked! (You are now on site)' : 'Exit marked! (Goodbye)';
+        if(type === 'entry') markedEntry = true;
+      });
+    }
+
+    // Mark exit when tab/browser closes
+    window.addEventListener('beforeunload', function (e) {
+      if (workerId && markedEntry) {
+        navigator.sendBeacon(`${API}/attendance/${workerId}`, JSON.stringify({ type: 'exit' }));
+      }
+    });
+
+    // Load last 3 attendance records for the worker
+    function loadAttendance() {
+      fetch(`${API}/workers`)
+        .then(r => r.json())
+        .then(workers => {
+          const w = workers.find(w => w.id === workerId);
+          if (w && w.attendance && w.attendance.length) {
+            document.getElementById('attendanceLog').innerHTML =
+              "<b>Recent Attendance:</b><br>" +
+              w.attendance.slice(-3).map(a =>
+                `${a.type.charAt(0).toUpperCase() + a.type.slice(1)} @ ${new Date(a.time).toLocaleString()}`
+              ).join('<br>');
+          } else {
+            document.getElementById('attendanceLog').innerHTML = "";
+          }
+        });
+    }
+
+    function logoutWorker() {
+      workerId = null;
+      workerName = "";
+      markedEntry = false;
+      hideAll();
+      document.getElementById('roleCard').style.display = "block";
+    }
+
+    // Start with role selection
+    hideAll();
+    document.getElementById('roleCard').style.display = "block";
+  </script>
+</body>
+</html>
